@@ -10,7 +10,21 @@
 </head>
 <body>
     <h1>Température en Temps Réel</h1>
+
+    <div>
+        <h2>Température Actuelle : <span id="currentTemperature">-- °C</span></h2>
+    </div>
+
+    <div>
+        <label for="startDate">Date de début :</label>
+        <input type="datetime-local" id="startDate">
+        <label for="endDate">Date de fin :</label>
+        <input type="datetime-local" id="endDate">
+        <button id="updateChart">Mettre à jour</button>
+    </div>
+
     <canvas id="temperatureChart" width="400" height="200"></canvas>
+
     <script src="app.js"></script>
 </body>
 </html>

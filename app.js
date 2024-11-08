@@ -17,7 +17,7 @@ const temperatureChart = new Chart(ctx, {
     data: temperatureData,
     options: {
         scales: {
-            x: { 
+            x: {
                 type: 'time',
                 time: {
                     unit: 'minute'
@@ -43,6 +43,8 @@ socket.on('temperature_update', (data) => {
 
     const { temperature, timestamp } = data;
 
+    document.getElementById('currentTemperature').innerText = `${temperature} °C`;
+
     temperatureChart.data.labels.push(new Date(timestamp));
     temperatureChart.data.datasets[0].data.push(temperature);
 
@@ -50,6 +52,28 @@ socket.on('temperature_update', (data) => {
         temperatureChart.data.labels.shift();
         temperatureChart.data.datasets[0].data.shift();
     }
+
+    temperatureChart.update();
+});
+
+document.getElementById('updateChart').addEventListener('click', () => {
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+
+    if (startDate && endDate) {
+        socket.emit('get_temperature_range', startDate, endDate);
+    }
+});
+
+socket.on('temperature_range_update', (data) => {
+    temperatureChart.data.labels = [];
+    temperatureChart.data.datasets[0].data = [];
+
+    data.forEach(entry => {
+        const { timestamp, temperature } = entry;
+        temperatureChart.data.labels.push(new Date(timestamp));
+        temperatureChart.data.datasets[0].data.push(temperature);
+    });
 
     temperatureChart.update();
 });
