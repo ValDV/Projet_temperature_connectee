@@ -7,23 +7,128 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
     <script src="/socket.io/socket.io.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            flex-direction: column;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #ff6347;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 1.6em;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        #currentTemperature {
+            font-weight: bold;
+            color: #007BFF;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 80%;
+            max-width: 900px;
+        }
+
+        canvas {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .period-selection {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .period-selection label {
+            font-size: 1.2em;
+            color: #ff6347;
+            margin-right: 10px;
+        }
+
+        .period-selection input {
+            margin: 10px 0;
+            padding: 8px;
+            font-size: 1em;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            width: 45%;
+        }
+
+        .period-selection .input-row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .period-selection button {
+            background-color: #007BFF;
+            color: white;
+            font-size: 1.1em;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .period-selection button:hover {
+            background-color: #0056b3;
+        }
+
+    </style>
 </head>
 <body>
-    <h1>Température en Temps Réel</h1>
 
-    <div>
+    <div class="container">
+        <h1>Température en Temps Réel</h1>
+
         <h2>Température Actuelle : <span id="currentTemperature">-- °C</span></h2>
-    </div>
 
-    <div>
-        <label for="startDate">Date de début :</label>
-        <input type="datetime-local" id="startDate">
-        <label for="endDate">Date de fin :</label>
-        <input type="datetime-local" id="endDate">
-        <button id="updateChart">Mettre à jour</button>
-    </div>
+        <canvas id="temperatureChart" width="400" height="200"></canvas>
 
-    <canvas id="temperatureChart" width="400" height="200"></canvas>
+        <div class="period-selection">
+            <div class="input-row">
+                <div>
+                    <label for="startDate">Date de début :</label>
+                    <input type="datetime-local" id="startDate">
+                </div>
+                <div>
+                    <label for="endDate">Date de fin :</label>
+                    <input type="datetime-local" id="endDate">
+                </div>
+            </div>
+            <button id="updateChart">Mettre à jour</button>
+        </div>
+    </div>
 
     <script src="app.js"></script>
 </body>
