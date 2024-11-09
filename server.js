@@ -2,16 +2,19 @@ const express = require('express');
 const socketIo = require('socket.io');
 const mysql = require('mysql2');
 const http = require('http');
+const fs = require('fs');
+
+const config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
 const db = mysql.createConnection({
-    host: '127.0.0.1',
-    user: 'user_temp',
-    password: 'debian',
-    database: 'temperature'
+    host: config.db_host,
+    user: config.db_user,
+    password: config.db_password,
+    database: config.db_database
 });
 
 db.connect((err) => {
