@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ConfigWindow</class>
+ <widget class="QMainWindow" name="ConfigWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>ConfigWindow</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout">
+    <item>
+     <widget class="QLineEdit" name="idLineEdit">
+      <property name="placeholderText">
+       <string>ID de la sonde</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="nameLineEdit">
+      <property name="placeholderText">
+       <string>Nom de la sonde</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="wifiSSIDLineEdit">
+      <property name="placeholderText">
+       <string>SSID Wi-Fi</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="wifiPasswordLineEdit">
+      <property name="placeholderText">
+       <string>Mot de passe Wi-Fi</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="mqttBrokerLineEdit">
+      <property name="placeholderText">
+       <string>Adresse du broker MQTT</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QSpinBox" name="mqttPortSpinBox">
+      <property name="minimum">
+       <number>1</number>
+      </property>
+      <property name="maximum">
+       <number>65535</number>
+      </property>
+      <property name="value">
+       <number>1883</number>
+      </property>
+      <property name="prefix">
+       <string>Port MQTT : </string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="mqttUsernameLineEdit">
+      <property name="placeholderText">
+       <string>Nom d'utilisateur MQTT</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="mqttPasswordLineEdit">
+      <property name="placeholderText">
+       <string>Mot de passe MQTT</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLineEdit" name="topicLineEdit">
+      <property name="placeholderText">
+       <string>Topic MQTT</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="startSimulationButton">
+      <property name="text">
+       <string>Démarrer la simulation</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QTextEdit" name="outputTextEdit">
+      <property name="readOnly">
+       <bool>true</bool>
+      </property>
+      <property name="placeholderText">
+       <string>Messages de simulation...</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <connections/>
+</ui>

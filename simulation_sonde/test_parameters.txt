@@ -1,0 +1,17 @@
+- ID : sonde_001
+
+- Nom : Sonde Température 1
+
+- SSID WiFi : Test_WiFi
+
+- Mot de passe WiFi : password123
+
+- Broker MQTT : mqtt.example.com
+
+- Port MQTT : 1883
+
+- Nom d'utilisateur MQTT : user_mqtt
+
+- Mot de passe MQTT : mqtt_pass
+
+- Topic : sensors/temperature/sonde_001
