@@ -1,26 +1,25 @@
-# include <SoftwareSerial.h>
+# include <WiFiNINA.h>
+# include <PubSubClient.h>
 # include <ArduinoJson.h>
 
-const int wifiRX = 2;
-const int wifiTX = 3;
+const char* ssid = "LaboCIEL2";
+const char* password = "donnemoiunebrique";
+
+const char* broker = "192.168.65.211";
+const int port = 1883;
+const char* topic = "temperature";
 
 const int sensorPin = A0;
 
-const char* ssid = "ssidwifi";
-const char* password = "passwordwifi";
-
-const char* broker = "192.168.65.211";
-const int port = 3000;
-const char* topic = "temperature_data";
-
-SoftwareSerial wifiSerial(wifiRX, wifiTX);
+WiFiClient wifiClient;
+PubSubClient mqttClient(wifiClient);
 
 void setup() {
  Serial.begin(9600);
- wifiSerial.begin(9600);
 
  connectToWiFi();
 
+ mqttClient.setServer(broker, port);
  connectToMQTT();
 }
 
@@ -34,30 +33,35 @@ void loop() {
 
  publishToMQTT(payload);
 
+ if (!mqttClient.connected()) {
+  connectToMQTT();
+ }
+ mqttClient.loop();
+
  delay(5000);
 }
 
 void connectToWiFi() {
- Serial.println("Connexion au WiFi...");
-
- sendCommand("AT");
- sendCommand("AT+RST");
- delay(1000);
-
- sendCommand("AT+CWMODE=1");
- sendCommand("AT+CWJAP=\"" + String(ssid) + "\",\"" + String(password) + "\"");
-
- delay(2000);
- Serial.println("Connecté au WiFi !");
+ Serial.print("Connexion au WiFi...");
+ while (WiFi.begin(ssid, password) != WL_CONNECTED) {
+  Serial.print(".");
+  delay(1000);
+ }
+ Serial.println("\nConnecté au WiFi !");
+ Serial.print("Adresse IP : ");
+ Serial.println(WiFi.localIP());
 }
 
 void connectToMQTT() {
- Serial.println("Connexion au broker MQTT...");
-
- sendCommand("AT+CIPSTART=\"TCP\",\"" + String(broker) + "\"," + String(port));
- delay(2000);
-
- Serial.println("Connecté au broker MQTT !");
+ Serial.print("Connexion au broker MQTT...");
+ do {
+  if (mqttClient.connect("ArduinoClient")) {
+   Serial.println("\nConnecté au broker MQTT !");
+  } else {
+   Serial.print(".");
+   delay(1000);
+  }
+ }while (!mqttClient.connected());
 }
 
 String createJsonPayload(float temperature) {
@@ -74,24 +78,9 @@ String createJsonPayload(float temperature) {
 }
 
 void publishToMQTT(String payload) {
- int payloadSize = payload.length();
-
- String publishCommand = "AT+CIPSEND=" + String(payloadSize + 2);
- sendCommand(publishCommand);
- delay(500);
-
- wifiSerial.print(payload);
- wifiSerial.print("\r\n");
- delay(1000);
-
- Serial.println("Données publiées : " + payload);
-}
-
-void sendCommand(String command) {
- wifiSerial.println(command);
- delay(500);
-
- while (wifiSerial.available()) {
- Serial.write(wifiSerial.read());
+ if (mqttClient.publish(topic, payload.c_str())) {
+  Serial.println("Données publiées : " + payload);
+ } else {
+  Serial.println("Échec de la publication !");
  }
 }
