@@ -3,6 +3,7 @@ const socketIo = require('socket.io');
 const mysql = require('mysql2');
 const http = require('http');
 const fs = require('fs');
+const mqtt = require('mqtt');
 
 const config = JSON.parse(fs.readFileSync('config.json', 'utf8'));
 
@@ -25,27 +26,37 @@ db.connect((err) => {
     console.log('Connexion à la base de données réussie.');
 });
 
-function generateRandomTemperature() {
-    return (Math.random() * 4 + 18).toFixed(2);
-}
+const mqttClient = mqtt.connect(`mqtt://${config.mqtt_host}:${config.mqtt_port}`);
 
-setInterval(() => {
-    const temperature = generateRandomTemperature();
-    const timestamp = new Date();
+mqttClient.on('connect', () => {
+    console.log('Connecté au broker MQTT');
+    mqttClient.subscribe(config.mqtt_topic, (err) => {
+        if (err) {
+            console.error('Erreur lors de la souscription au topic MQTT :', err);
+        }
+    });
+});
 
-    db.query(
-        "INSERT INTO temperature_readings (timestamp, temperature) VALUES (?, ?)",
-        [timestamp, temperature],
-        (err) => {
+mqttClient.on('message', (topic, message) => {
+    console.log(`Message reçu sur ${topic} : ${message}`);
+    try {
+        const data = JSON.parse(message);
+
+        const query = `INSERT INTO temperature_readings (timestamp, temperature) VALUES (?, ?)`;
+        const timestamp = new Date();
+        db.query(query, [timestamp, data.value], (err) => {
             if (err) {
                 console.error("Erreur lors de l'insertion des données :", err);
+                return;
             }
-        }
-    );
+            console.log('Données insérées dans la base MySQL.');
+        });
 
-    io.emit('temperature_update', { temperature, timestamp });
-    console.log(`Température générée : ${temperature} °C à ${timestamp}`);
-}, 60000);
+        io.emit('temperature_update', { temperature: data.value, timestamp });
+    } catch (err) {
+        console.error('Erreur lors du traitement des données MQTT :', err);
+    }
+});
 
 app.use(express.static('public'));
 
@@ -79,5 +90,5 @@ io.on('connection', (socket) => {
 
 const port = 3000;
 server.listen(port, () => {
-    console.log(`Serveur de test démarré sur http://192.168.65.211:${port}`);
+    console.log(`Serveur démarré sur http://192.168.65.211:${port}`);
 });

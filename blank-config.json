@@ -1,6 +1,9 @@
 {
-  "db_host": "",
-  "db_user": "",
-  "db_password": "",
-  "db_database": ""
+    "db_host": "",
+    "db_user": "",
+    "db_password": "",
+    "db_database": "temperature",
+    "mqtt_host": "",
+    "mqtt_port": 1883,
+    "mqtt_topic": "temperature"
 }
