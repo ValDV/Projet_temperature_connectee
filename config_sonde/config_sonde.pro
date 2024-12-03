@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -17,12 +17,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     main.cpp \
-    configwindow.cpp \
-    simulatedsonde.cpp
+    configwindow.cpp
 
 HEADERS += \
-    configwindow.h \
-    simulatedsonde.h
+    configwindow.h
 
 FORMS += \
     configwindow.ui

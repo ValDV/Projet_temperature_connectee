@@ -2,8 +2,9 @@
 # include <PubSubClient.h>
 # include <ArduinoJson.h>
 
-const char* ssid = "LaboCIEL2";
-const char* password = "donnemoiunebrique";
+// Variables globales pour les paramètres WiFi
+String ssid = "";
+String password = "";
 
 const char* broker = "192.168.65.211";
 const int port = 1883;
@@ -15,12 +16,14 @@ WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
 
 void setup() {
- Serial.begin(9600);
+  Serial.begin(9600);
 
- connectToWiFi();
+  Serial.println("Prêt à recevoir les paramètres WiFi...");
+  waitForWiFiConfig();
 
- mqttClient.setServer(broker, port);
- connectToMQTT();
+  connectToWiFi();
+  mqttClient.setServer(broker, port);
+  connectToMQTT();
 }
 
 void loop() {
@@ -41,15 +44,43 @@ void loop() {
  delay(5000);
 }
 
+void waitForWiFiConfig() {
+    while (ssid.length() == 0 || password.length() == 0) { // Vérifie si les chaînes sont vides
+        if (Serial.available()) {
+            String jsonData = Serial.readStringUntil('\n'); // Lire les données jusqu'à une nouvelle ligne
+            processWiFiConfig(jsonData);
+        }
+    }
+}
+
+void processWiFiConfig(const String& jsonData) {
+  StaticJsonDocument<128> doc;
+  DeserializationError error = deserializeJson(doc, jsonData);
+
+  if (error) {
+    Serial.println("Erreur de décodage JSON");
+    return;
+  }
+
+  ssid = doc["ssid"].as<String>();
+  password = doc["password"].as<String>();
+
+  Serial.println("Paramètres WiFi reçus :");
+  Serial.print("SSID : ");
+  Serial.println(ssid);
+  Serial.print("Mot de passe : ");
+  Serial.println(password);
+}
+
 void connectToWiFi() {
- Serial.print("Connexion au WiFi...");
- while (WiFi.begin(ssid, password) != WL_CONNECTED) {
-  Serial.print(".");
-  delay(1000);
- }
- Serial.println("\nConnecté au WiFi !");
- Serial.print("Adresse IP : ");
- Serial.println(WiFi.localIP());
+  Serial.print("Connexion au WiFi...");
+  while (WiFi.begin(ssid.c_str(), password.c_str()) != WL_CONNECTED) {
+    Serial.print(".");
+    delay(1000);
+  }
+  Serial.println("\nConnecté au WiFi !");
+  Serial.print("Adresse IP : ");
+  Serial.println(WiFi.localIP());
 }
 
 void connectToMQTT() {
@@ -66,11 +97,11 @@ void connectToMQTT() {
 
 String createJsonPayload(float temperature) {
  StaticJsonDocument<128> doc;
- doc["sonde_id"] = "Sonde_1";
- doc["sonde_name"] = "Capteur_Temperature";
+ doc["id"] = "Sonde_1";
+ doc["name"] = "Capteur_Temperature";
  doc["type"] = "temperature";
  doc["value"] = temperature;
- doc["unit"] = "C";
+ doc["unit"] = "°C";
 
  String payload;
  serializeJson(doc, payload);
