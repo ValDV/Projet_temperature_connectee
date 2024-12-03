@@ -1,10 +1,13 @@
 # include <WiFiNINA.h>
 # include <PubSubClient.h>
 # include <ArduinoJson.h>
+//#include <EEPROM.h>
 
-// Variables globales pour les paramètres WiFi
+/*// Variables globales pour les paramètres WiFi
 String ssid = "";
-String password = "";
+String password = "";*/
+const char* ssid = "LaboCIEL2";
+const char* password = "donnemoiunebrique";
 
 const char* broker = "192.168.65.211";
 const int port = 1883;
@@ -15,11 +18,32 @@ const int sensorPin = A0;
 WiFiClient wifiClient;
 PubSubClient mqttClient(wifiClient);
 
+/*typedef struct 
+{
+  int id;
+  char ssid[50];
+  char password[50];
+} Config;
+
+#define CONFIG_ADDR 1
+
+long lastNotify = 0;
+Config config;
+
+void loadConfigFromEEPROM()
+{
+  EEPROM.get(CONFIG_ADDR, config);
+}
+
+void saveConfigToEEPROM()
+{
+  EEPROM.put(CONFIG_ADDR, config);
+}*/
+
 void setup() {
   Serial.begin(9600);
 
-  Serial.println("Prêt à recevoir les paramètres WiFi...");
-  waitForWiFiConfig();
+  //loadConfigFromEEPROM();
 
   connectToWiFi();
   mqttClient.setServer(broker, port);
@@ -27,30 +51,38 @@ void setup() {
 }
 
 void loop() {
- int sensorValue = analogRead(sensorPin);
- float voltage = sensorValue * (5.0 / 1023.0);
- float temperatureC = (voltage - 0.5) * 100.0;
- temperatureC /= 10.0;
+ /*long currentTime = millis();
+ 
+ if(currentTime > lastNotify + 5000)
+ {*/
+  int sensorValue = analogRead(sensorPin);
+  float voltage = sensorValue * (5.0 / 1023.0);
+  float temperatureC = (voltage - 0.5) * 100.0;
+  temperatureC /= 10.0;
 
- String payload = createJsonPayload(temperatureC);
+  String payload = createJsonPayload(temperatureC);
+  
+  publishToMQTT(payload);
 
- publishToMQTT(payload);
+  if (!mqttClient.connected()) {
+    connectToMQTT();
+  }
 
- if (!mqttClient.connected()) {
-  connectToMQTT();
+    /*lastNotify = currentTime;
  }
- mqttClient.loop();
 
+ checkSerial();*/
+ mqttClient.loop();
  delay(5000);
 }
 
-void waitForWiFiConfig() {
-    while (ssid.length() == 0 || password.length() == 0) { // Vérifie si les chaînes sont vides
-        if (Serial.available()) {
-            String jsonData = Serial.readStringUntil('\n'); // Lire les données jusqu'à une nouvelle ligne
-            processWiFiConfig(jsonData);
-        }
+/*void checkSerial() {
+    
+    if (Serial.available()) {
+      String jsonData = Serial.readStringUntil('\n');
+      processWiFiConfig(jsonData);
     }
+    
 }
 
 void processWiFiConfig(const String& jsonData) {
@@ -62,19 +94,26 @@ void processWiFiConfig(const String& jsonData) {
     return;
   }
 
+  Serial.println("Données reçues : ");
+  Serial.println(jsonData);
+
   ssid = doc["ssid"].as<String>();
   password = doc["password"].as<String>();
+
+  ssid.toCharArray(config.ssid, 50);
+  password.toCharArray(config.password, 50);
+  saveConfigToEEPROM();
 
   Serial.println("Paramètres WiFi reçus :");
   Serial.print("SSID : ");
   Serial.println(ssid);
   Serial.print("Mot de passe : ");
   Serial.println(password);
-}
+}*/
 
 void connectToWiFi() {
   Serial.print("Connexion au WiFi...");
-  while (WiFi.begin(ssid.c_str(), password.c_str()) != WL_CONNECTED) {
+  while (WiFi.begin(ssid/*.c_str()*/, password/*.c_str()*/) != WL_CONNECTED) {
     Serial.print(".");
     delay(1000);
   }
