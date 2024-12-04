@@ -6,7 +6,9 @@
 #include <QSerialPortInfo>
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class ConfigWindow; }
+namespace Ui {
+class ConfigWindow;
+}
 QT_END_NAMESPACE
 
 class ConfigWindow : public QMainWindow
@@ -22,8 +24,9 @@ private slots:
 
 private:
     Ui::ConfigWindow *ui;
-    QSerialPort *serial;  // Pointeur vers QSerialPort
-    void populateSerialPorts(); // Méthode pour lister les ports série
+    QSerialPort serialPort;
+
+    void loadSerialPorts(); // Pour charger les ports disponibles dans portComboBox
 };
 
 #endif // CONFIGWINDOW_H

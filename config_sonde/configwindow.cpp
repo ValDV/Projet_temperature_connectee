@@ -5,17 +5,13 @@
 ConfigWindow::ConfigWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::ConfigWindow)
-    , serial(new QSerialPort(this))
 {
     ui->setupUi(this);
-    populateSerialPorts();
 
-    // Configuration initiale du port série
-    serial->setBaudRate(QSerialPort::Baud9600);
-    serial->setDataBits(QSerialPort::Data8);
-    serial->setParity(QSerialPort::NoParity);
-    serial->setStopBits(QSerialPort::OneStop);
-    serial->setFlowControl(QSerialPort::NoFlowControl);
+    ui->idLineEdit->setText("Test");
+
+    // Charger les ports série disponibles dans la ComboBox
+    loadSerialPorts();
 }
 
 ConfigWindow::~ConfigWindow()
@@ -23,7 +19,7 @@ ConfigWindow::~ConfigWindow()
     delete ui;
 }
 
-void ConfigWindow::populateSerialPorts()
+void ConfigWindow::loadSerialPorts()
 {
     ui->portComboBox->clear();
     foreach (const QSerialPortInfo &info, QSerialPortInfo::availablePorts()) {
@@ -33,30 +29,36 @@ void ConfigWindow::populateSerialPorts()
 
 void ConfigWindow::on_sendButton_clicked()
 {
-    // Récupération des paramètres saisis
+    // Récupérer les valeurs des champs
+    QString id = ui->idLineEdit->text();
     QString ssid = ui->ssidLineEdit->text();
     QString password = ui->passwordLineEdit->text();
 
-    if (ssid.isEmpty() || password.isEmpty()) {
-        QMessageBox::warning(this, "Erreur", "Veuillez remplir les champs SSID et mot de passe !");
+    // Vérifier que tous les champs sont remplis
+    if (id.isEmpty() || ssid.isEmpty() || password.isEmpty()) {
+        QMessageBox::warning(this, "Champs manquants", "Veuillez remplir tous les champs.");
         return;
     }
 
-    // Format des données au format JSON
-    QString configData = QString("{\"ssid\":\"%1\", \"password\":\"%2\"}\n").arg(ssid, password);
+    // Configurer et ouvrir le port série
+    serialPort.setPortName(ui->portComboBox->currentText());
+    serialPort.setBaudRate(QSerialPort::Baud9600);
+    serialPort.setDataBits(QSerialPort::Data8);
+    serialPort.setParity(QSerialPort::NoParity);
+    serialPort.setStopBits(QSerialPort::OneStop);
+    serialPort.setFlowControl(QSerialPort::NoFlowControl);
 
-    // Ouverture du port série sélectionné
-    QString portName = ui->portComboBox->currentText();
-    serial->setPortName(portName);
-    if (!serial->open(QIODevice::WriteOnly)) {
-        QMessageBox::critical(this, "Erreur", "Impossible d'ouvrir le port série !");
+    if (!serialPort.open(QIODevice::WriteOnly)) {
+        QMessageBox::critical(this, "Erreur", "Impossible d'ouvrir le port série.");
         return;
     }
 
-    // Envoi des données à l'Arduino
-    serial->write(configData.toUtf8());
-    serial->flush();
+    // Créer le message à envoyer
+    QString message = QString("ID:%1\nSSID:%2\nPASSWORD:%3\n").arg(id, ssid, password);
 
-    QMessageBox::information(this, "Succès", "Paramètres envoyés !");
-    serial->close();
+    // Envoyer le message
+    serialPort.write(message.toUtf8());
+    serialPort.close();
+
+    QMessageBox::information(this, "Envoyé", "Les données ont été envoyées avec succès.");
 }

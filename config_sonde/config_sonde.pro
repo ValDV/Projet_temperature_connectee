@@ -1,5 +1,7 @@
-QT       += core gui serialport
+QMAKE_CXXFLAGS += -Wall
+QMAKE_CXXFLAGS += -DQT_DEBUG
 
+QT += core gui serialport
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
@@ -19,11 +21,9 @@ SOURCES += \
     main.cpp \
     configwindow.cpp
 
-HEADERS += \
-    configwindow.h
+HEADERS += configwindow.h
 
-FORMS += \
-    configwindow.ui
+FORMS += configwindow.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
